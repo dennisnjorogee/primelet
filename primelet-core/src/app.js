@@ -1,23 +1,16 @@
 import express from "express";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
-import cors from "cors";
+import corsRouter from "./config/cors.js";
 import swaggerUi from "swagger-ui-express";
-import swaggerSpec from "./config/swagger.js";
+import swaggerSpec from "../docs/swagger.js";
 import routes from "./routes/index.routes.js";
 
 const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+app.use(corsRouter);
 
 app.use(express.json());
 app.use(cookieParser());
@@ -34,7 +27,7 @@ app.use((error, req, res, next) => {
     });
   }
 
-  console.error("SYSTEM ERROR:", error);
+  console.error("CRITICAL SYSTEM ERROR:", error);
 
   return res.status(500).json({
     status: "error",
