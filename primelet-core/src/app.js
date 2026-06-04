@@ -2,6 +2,8 @@ import express from "express";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js";
 import routes from "./routes/index.routes.js";
 
 const app = express();
@@ -19,6 +21,8 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.use("/api/v1/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/v1", routes);
 

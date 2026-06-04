@@ -9,10 +9,7 @@ async function testDb() {
 }
 
 app.listen(PORT, () => {
-  testDb();
   console.log(`Server running on http://127.0.0.1:${PORT}`);
 
-  if (process.env.NODE_ENV !== "production") {
-    console.log("API DOCS: http://127.0.0.1:5000/api-docs");
-  }
+  console.log("api docs: http://127.0.0.1:5000/api/v1/docs");
 });
