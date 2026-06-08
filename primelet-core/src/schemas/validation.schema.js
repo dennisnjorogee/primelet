@@ -4,7 +4,7 @@ import parsePhoneNumberFromString from "libphonenumber-js";
 export const signupSchema = z.object({
   firstName: z.string().trim().min(1, "Firstname is required"),
   lastName: z.string().trim().min(1, "Lastname is required"),
-  emailAddress: z.string().email("Invalid email address"),
+  emailAddress: z.string().email("Invalid email address").toLowerCase(),
   phoneNumber: z.string().transform((val, ctx) => {
     const phone = parsePhoneNumberFromString(val, {
       defaultCountry: "KE",

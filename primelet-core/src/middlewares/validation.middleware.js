@@ -1,7 +1,7 @@
 import { ZodError } from "zod";
 import { appError } from "../utils/error.js";
 
-export const validate = (schema) => {
+export const validateRegData = (schema) => {
   return (req, res, next) => {
     try {
       const { firstName, lastName, emailAddress, phoneNumber, password } =
@@ -31,7 +31,6 @@ export const validate = (schema) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        console.log(error.issues);
         return next(appError(error.issues[0].message, 400));
       }
 
