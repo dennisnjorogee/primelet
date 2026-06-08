@@ -3,12 +3,15 @@ import pool from "../../config/db.js";
 import { appError } from "../../utils/error.js";
 export const registrationService = async (registrationData) => {
   /**
-   * WORKFLOW
+   * DEV WORKFLOW NOTES
    * - Check if unique identifiers exist in db
    * - If they exist, throw error
    * - Otherwise create user account and save the data to DB
+   * - NOTES: Hash user password,
+   * - Send verification token to user via EMAIL
    */
   const connection = await pool.getConnection();
+
   try {
     await connection.beginTransaction();
     // Destructure registrationData
