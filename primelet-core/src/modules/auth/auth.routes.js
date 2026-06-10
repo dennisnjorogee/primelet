@@ -15,5 +15,10 @@ router.post(
   validationMiddleware.register(validationSchema.signup),
   authController.register,
 );
+router.post(
+  "/verify-email",
+  validationMiddleware.verifyEmail(validationSchema.verifyEmail),
+  authController.verifyEmail,
+);
 
 export default router;
