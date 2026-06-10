@@ -1,5 +1,5 @@
 import { ZodError } from "zod";
-import { appError } from "../utils/error.js";
+import utils from "../utils/utils.js";
 
 const login = (loginSchema) => {
   return (req, res, next) => {
@@ -7,11 +7,11 @@ const login = (loginSchema) => {
       const { emailAddress, password } = req.body || {};
 
       if (!emailAddress) {
-        throw appError("Email address is required", 400);
+        throw utils.appError("Email address is required", 400);
       }
 
       if (!password) {
-        throw appError("Password cannot be empty", 400);
+        throw utils.appError("Password cannot be empty", 400);
       }
 
       const validLoginData = loginSchema.parse(req.body);
@@ -20,7 +20,7 @@ const login = (loginSchema) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        return next(appError(error.issues[0].message, 400));
+        return next(utils.appError(error.issues[0].message, 400));
       }
 
       next(error);
@@ -35,30 +35,30 @@ const register = (registrationSchema) => {
         req.body || {};
 
       if (!firstName) {
-        throw appError("First name is required", 400);
+        throw utils.appError("First name is required", 400);
       }
 
       if (!lastName) {
-        throw appError("Last name is required", 400);
+        throw utils.appError("Last name is required", 400);
       }
 
       if (!emailAddress) {
-        throw appError("Email address is required", 400);
+        throw utils.appError("Email address is required", 400);
       }
 
       if (!phoneNumber) {
-        throw appError("Phone number is required", 400);
+        throw utils.appError("Phone number is required", 400);
       }
 
       if (!password) {
-        throw appError("Password cannot be empty!", 400);
+        throw utils.appError("Password cannot be empty!", 400);
       }
       const validRegistrationData = registrationSchema.parse(req.body);
       req.body = validRegistrationData;
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        return next(appError(error.issues[0].message, 400));
+        return next(utils.appError(error.issues[0].message, 400));
       }
 
       next(error);

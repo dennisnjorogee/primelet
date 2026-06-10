@@ -1,14 +1,9 @@
 import bcrypt from "bcrypt";
 import pool from "../../config/db.js";
-import { appError } from "../../utils/error.js";
+import utils from "../../utils/utils.js";
 import { sendVerificationMail } from "../../services/email.service.js";
-import {
-  signAccessToken,
-  signRefreshToken,
-  generateVerificationToken,
-} from "../../utils/tokens.js";
 
-export const loginService = async (loginData) => {
+const login = async (loginData) => {
   /**
    * LOGIN SERVICE WORKFLOW
    * - check if identifier(emailAddress) exists in db
@@ -29,7 +24,7 @@ export const loginService = async (loginData) => {
     );
 
     if (emailRows.length === 0) {
-      throw appError("Invalid email or password", 401);
+      throw utils.appError("Invalid email or password", 401);
     }
 
     const user = emailRows[0];
@@ -38,12 +33,12 @@ export const loginService = async (loginData) => {
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
-      throw appError("Invalid email or password", 401);
+      throw utils.appError("Invalid email or password", 401);
     }
 
     // generate JWT access + refresh tokens
-    const accessToken = signAccessToken(user.id);
-    const refreshToken = signRefreshToken(user.id);
+    const accessToken = utils.signAccessToken(user.id);
+    const refreshToken = utils.signRefreshToken(user.id);
 
     return { accessToken, refreshToken };
   } catch (error) {
@@ -51,7 +46,7 @@ export const loginService = async (loginData) => {
   }
 };
 
-export const registrationService = async (registrationData) => {
+const register = async (registrationData) => {
   /**
    * DEV WORKFLOW NOTES
    * - Check if unique identifiers exist in db
@@ -75,7 +70,7 @@ export const registrationService = async (registrationData) => {
     );
 
     if (emailRows.length > 0) {
-      throw appError("Email address already exists", 409);
+      throw utils.appError("Email address already exists", 409);
     }
 
     //check phoneNumber
@@ -85,7 +80,7 @@ export const registrationService = async (registrationData) => {
     );
 
     if (phoneRows.length > 0) {
-      throw appError("Phone number already exists", 409);
+      throw utils.appError("Phone number already exists", 409);
     }
 
     // Hash user password
@@ -98,7 +93,7 @@ export const registrationService = async (registrationData) => {
     );
 
     // verification token
-    const { token, expiresAt } = generateVerificationToken();
+    const { token, expiresAt } = utils.generateVerificationToken();
 
     const tokenHash = await bcrypt.hash(token, 10);
 
@@ -116,3 +111,5 @@ export const registrationService = async (registrationData) => {
     connection.release();
   }
 };
+
+export default { login, register };

@@ -1,12 +1,11 @@
-import { appError } from "../../utils/error.js";
-import { loginService, registrationService } from "./auth.service.js";
+import authService from "./auth.service.js";
 
 const login = async (req, res, next) => {
   try {
     //logindata contains emailAddress, password
     const loginData = req.body;
 
-    const { accessToken, refreshToken } = await loginService(loginData);
+    const { accessToken, refreshToken } = await authService.login(loginData);
 
     res.cookie("_accesstoken", accessToken, {
       httpOnly: true,
@@ -36,7 +35,7 @@ const register = async (req, res, next) => {
     // registrationData contains firstName, lastName, emailAddress, phoneNumber & password
     const registrationData = req.body;
 
-    await registrationService(registrationData);
+    await authService.register(registrationData);
 
     return res
       .status(200)
