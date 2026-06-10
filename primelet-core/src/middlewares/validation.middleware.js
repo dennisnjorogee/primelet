@@ -53,6 +53,7 @@ const register = (registrationSchema) => {
       if (!password) {
         throw utils.appError("Password cannot be empty!", 400);
       }
+
       const validRegistrationData = registrationSchema.parse(req.body);
       req.body = validRegistrationData;
       next();
@@ -66,4 +67,26 @@ const register = (registrationSchema) => {
   };
 };
 
-export default { login, register };
+const verifyEmail = (verifyEmailSchema) => {
+  return (req, res, next) => {
+    try {
+      const { verificationToken } = req.body || {};
+
+      if (!verificationToken) {
+        throw utils.appError("Verification token is required", 400);
+      }
+
+      const validVerificationToken = verifyEmailSchema.parse(req.body);
+      req.body = validVerificationToken;
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return next(utils.appError(error.issues[0].message, 400));
+      }
+
+      next(error);
+    }
+  };
+};
+
+export default { login, register, verifyEmail };

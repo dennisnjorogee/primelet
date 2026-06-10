@@ -31,4 +31,8 @@ const signup = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export default { login, signup };
+const verifyEmail = z.object({
+  verificationToken: z.string().trim().min(1, "Verification token is required"),
+});
+
+export default { login, signup, verifyEmail };
