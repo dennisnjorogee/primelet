@@ -24,6 +24,7 @@ app.use((error, req, res, next) => {
     return res.status(error.statusCode).json({
       status: "fail",
       message: error.message,
+      errors: error.errors,
     });
   }
 

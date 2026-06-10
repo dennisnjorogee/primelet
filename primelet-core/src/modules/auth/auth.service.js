@@ -2,7 +2,6 @@ import bcrypt from "bcrypt";
 import pool from "../../config/db.js";
 import utils from "../../utils/utils.js";
 import emailService from "../../services/email.service.js";
-import { sendVerificationMail } from "../../services/email.service.js";
 
 const login = async (loginData) => {
   /**
@@ -61,8 +60,7 @@ const register = async (registrationData) => {
   try {
     await connection.beginTransaction();
     // Destructure registrationData
-    const { firstName, lastName, emailAddress, phoneNumber, password } =
-      registrationData;
+    const { firstName, lastName, emailAddress, password } = registrationData;
 
     //check emailAddress
     const [emailRows] = await connection.execute(
@@ -74,24 +72,16 @@ const register = async (registrationData) => {
       throw utils.appError("Email address already exists", 409);
     }
 
-    //check phoneNumber
-    const [phoneRows] = await connection.execute(
-      `SELECT 1 FROM users WHERE phone_number = ?`,
-      [phoneNumber],
-    );
-
-    if (phoneRows.length > 0) {
-      throw utils.appError("Phone number already exists", 409);
-    }
-
     // Hash user password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Store user info in DB
     const [result] = await connection.execute(
-      `INSERT INTO users (first_name, last_name, email_address, phone_number, password_hash) VALUES (?, ?, ?, ?, ?)`,
-      [firstName, lastName, emailAddress, phoneNumber, hashedPassword],
+      `INSERT INTO users (first_name, last_name, email_address,  password_hash) VALUES (?, ?, ?, ?)`,
+      [firstName, lastName, emailAddress, hashedPassword],
     );
+
+    const userId = result.insertId;
 
     // verification token
     const { token, expiresAt } = utils.generateVerificationToken();
@@ -100,11 +90,16 @@ const register = async (registrationData) => {
 
     await connection.execute(
       `INSERT INTO verification_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)`,
-      [result.insertId, tokenHash, expiresAt],
+      [userId, tokenHash, expiresAt],
     );
 
     await connection.commit();
+
+    const registrationToken = utils.signRegistrationToken(userId);
+
     emailService.verifyEmail(emailAddress, `${firstName} ${lastName}`, token);
+
+    return registrationToken;
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -113,4 +108,54 @@ const register = async (registrationData) => {
   }
 };
 
-export default { login, register };
+const verifyEmail = async (verificationToken, userId) => {
+  /**
+   * workflow
+   * -get stored hash using userId
+   * -compare the tokens
+   * -if success, mark email as verified
+   * -else throw error, exit
+   */
+  try {
+    //get stored token hash
+    const [tokenRows] = await pool.execute(
+      `SELECT token_hash, expires_at FROM verification_tokens WHERE user_id = ?`,
+      [userId],
+    );
+
+    const token = tokenRows[0];
+
+    if (!token) {
+      throw utils.appError(
+        "Invalid or expired verification link. Please request a new one.",
+        400,
+      );
+    }
+
+    // check if token is expired
+    if (new Date(token.expires_at).getTime() < Date.now()) {
+      throw utils.appError(
+        "Your verification link has expired. Please request a new one.",
+        400,
+      );
+    }
+
+    const tokenValid = await bcrypt.compare(
+      verificationToken,
+      token.token_hash,
+    );
+
+    if (tokenValid) {
+      await pool.execute(`UPDATE users SET email_verified = ? WHERE id = ?`, [
+        1,
+        userId,
+      ]);
+    } else {
+      throw utils.appError("Invalid verification token", 400);
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default { login, register, verifyEmail };
