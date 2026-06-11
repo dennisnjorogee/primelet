@@ -33,6 +33,10 @@ router.post(
   authController.forgotPassword,
 );
 
-router.post("/reset-password", authController.resetPassword);
+router.post(
+  "/reset-password",
+  validationMiddleware.resetPassword(validationSchema.resetPassword),
+  authController.resetPassword,
+);
 
 export default router;

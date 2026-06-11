@@ -46,4 +46,16 @@ const forgotPassword = z.object({
     .toLowerCase(),
 });
 
-export default { login, signup, verifyEmail, forgotPassword };
+const resetPassword = z.object({
+  resetToken: z
+    .string({
+      error: "Reset token is required",
+    })
+    .trim()
+    .min(1, "Reset token is required"),
+  password: z
+    .string({ error: "Password is required" })
+    .min(6, "Password must be at least 6 characters"),
+});
+
+export default { login, signup, verifyEmail, forgotPassword, resetPassword };
