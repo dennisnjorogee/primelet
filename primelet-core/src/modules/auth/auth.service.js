@@ -249,7 +249,65 @@ const forgotPassword = async (emailAddress) => {
   }
 };
 
-const resetPassword = async () => {};
+const resetPassword = async (resetToken, password) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    // hash incoming reset token
+    const incomingTokenHash = crypto.hash("sha256", resetToken, "hex");
+
+    // lookup the token in db
+    const [tokenRows] = await connection.execute(
+      `SELECT user_id, expires_at FROM reset_tokens WHERE token_hash = ?`,
+      [incomingTokenHash],
+    );
+
+    if (tokenRows.length === 0) {
+      throw utils.appError(
+        "Invalid or expired reset link. Please request a new one.",
+        400,
+      );
+    }
+
+    // destructure db response
+    const { user_id, expires_at } = tokenRows[0];
+
+    //check if reset token is expired
+
+    if (new Date(expires_at).getTime() < Date.now()) {
+      // clean expired token
+      await connection.execute(`DELETE FROM reset_tokens WHERE user_id = ?`, [
+        user_id,
+      ]);
+
+      throw utils.appError(
+        "Invalid or expired reset link. Please request a new one.",
+        400,
+      );
+    }
+
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // update user password
+    await connection.execute(
+      `UPDATE users SET password_hash = ? WHERE id = ?`,
+      [hashedPassword, user_id],
+    );
+
+    // delete reset token
+    await connection.execute(`DELETE FROM reset_tokens WHERE user_id = ?`, [
+      user_id,
+    ]);
+
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
 
 export default {
   login,
