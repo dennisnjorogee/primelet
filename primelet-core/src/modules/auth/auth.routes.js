@@ -21,4 +21,10 @@ router.post(
   authController.verifyEmail,
 );
 
+router.post(
+  "/resend-verify-email",
+  validationMiddleware.resendVerifyEmail(),
+  authController.resendVerifyEmail,
+);
+
 export default router;

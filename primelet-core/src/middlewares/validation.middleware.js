@@ -69,4 +69,34 @@ const verifyEmail = (verifyEmailSchema) => {
   };
 };
 
-export default { login, register, verifyEmail };
+const resendVerifyEmail = () => {
+  return (req, res, next) => {
+    try {
+      // extract userId from registrationToken
+      const registrationToken = req.cookies._regt;
+
+      if (!registrationToken) {
+        throw utils.appError("Invalid or expired verification session.", 400);
+      }
+
+      const userId = utils.decodeRegistrationToken(registrationToken);
+
+      req.user = { userId };
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const errors = error.issues.reduce((acc, issue) => {
+          const field = issue.path.join(".");
+          acc[field] = issue.message;
+          return acc;
+        }, {});
+
+        return next(utils.appError("Validation failed", 400, errors));
+      }
+
+      next(error);
+    }
+  };
+};
+
+export default { login, register, verifyEmail, resendVerifyEmail };

@@ -20,7 +20,7 @@ const signRefreshToken = (userId) => {
 };
 
 const signRegistrationToken = (userId) => {
-  return jwt.sign({ sub: userId }, secret, { expiresIn: "15m" });
+  return jwt.sign({ sub: userId }, secret, { expiresIn: "30d" });
 };
 
 const decodeRegistrationToken = (registrationToken) => {

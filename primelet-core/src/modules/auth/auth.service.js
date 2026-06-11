@@ -87,11 +87,15 @@ const register = async (registrationData) => {
 
     await connection.commit();
 
+    const registrationToken = utils.signRegistrationToken(userId);
+
     emailService.verifyEmail(
       emailAddress,
       `${firstName} ${lastName}`,
       verificationToken,
     );
+
+    return registrationToken;
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -171,6 +175,43 @@ const verifyEmail = async (verificationToken) => {
   }
 };
 
-const resendVerifyEmail = async () => {};
+const resendVerifyEmail = async (userId) => {
+  try {
+    // collect user email from db
+    const [rows] = await pool.execute(
+      `SELECT email_address, first_name, last_name, email_verified FROM users WHERE id = ?`,
+      [userId],
+    );
 
-export default { login, register, verifyEmail };
+    if (rows.length === 0) {
+      throw utils.appError("User not found", 404);
+    }
+
+    const { email_address, first_name, last_name, email_verified } = rows[0];
+
+    if (email_verified === 1) {
+      throw utils.appError("Email already verified", 400);
+    }
+
+    // get verification token
+    const { verificationToken, verificationTokenHash, expiresAt } =
+      utils.generateVerificationToken();
+
+    await pool.execute(
+      `INSERT INTO verification_tokens (user_id, token_hash, expires_at) 
+   VALUES (?, ?, ?) 
+   ON DUPLICATE KEY UPDATE token_hash = VALUES(token_hash), expires_at = VALUES(expires_at)`,
+      [userId, verificationTokenHash, expiresAt],
+    );
+
+    emailService.verifyEmail(
+      email_address,
+      `${first_name} ${last_name}`,
+      verificationToken,
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default { login, register, verifyEmail, resendVerifyEmail };

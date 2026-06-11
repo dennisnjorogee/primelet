@@ -35,7 +35,15 @@ const register = async (req, res, next) => {
     // registrationData contains firstName, lastName, emailAddress, & password
     const registrationData = req.body;
 
-    await authService.register(registrationData);
+    const registrationToken = await authService.register(registrationData);
+
+    res.cookie("_regt", registrationToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
 
     return res.status(201).json({
       status: "success",
@@ -54,6 +62,13 @@ const verifyEmail = async (req, res, next) => {
 
     await authService.verifyEmail(verificationToken);
 
+    res.clearCookie("_regt", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    });
+
     return res.status(200).json({
       status: "success",
       message: "Email verified successfully. You can now log in.",
@@ -65,7 +80,11 @@ const verifyEmail = async (req, res, next) => {
 
 const resendVerifyEmail = async (req, res, next) => {
   try {
-    return res.status(201).json({
+    const { userId } = req.user;
+
+    await authService.resendVerifyEmail(userId);
+
+    return res.status(200).json({
       status: "success",
       message:
         "A new verification link has been sent to your email. Please check your inbox.",
