@@ -238,6 +238,12 @@ const forgotPassword = async (emailAddress) => {
       `INSERT INTO reset_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token_hash = VALUES(token_hash), expires_at = VALUES(expires_at)`,
       [id, resetTokenHash, expiresAt],
     );
+
+    emailService.forgotPassword(
+      emailAddress,
+      `${first_name} ${last_name}`,
+      resetToken,
+    );
   } catch (error) {
     throw error;
   }
