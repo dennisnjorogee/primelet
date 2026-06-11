@@ -1,7 +1,19 @@
 import { Resend } from "resend";
 import emailTemplates from "../templates/email.templates.js";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : {
+      emails: {
+        send: async () => {
+          if (process.env.NODE_ENV === "test") {
+            return { id: "test-email" };
+          }
+          throw new Error("Missing Resend API key");
+        },
+      },
+    };
+
 const BASE_URL =
   process.env.NODE_ENV === "production"
     ? process.env.FRONTEND_URL
