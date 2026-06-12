@@ -1,5 +1,75 @@
+export const components = {
+  schemas: {
+    User: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+        firstName: { type: "string" },
+        lastName: { type: "string" },
+        emailAddress: { type: "string", format: "email" },
+        emailVerified: { type: "integer" },
+      },
+    },
+    LoginRequest: {
+      type: "object",
+      required: ["emailAddress", "password"],
+      properties: {
+        emailAddress: { type: "string", format: "email" },
+        password: { type: "string", minLength: 8 },
+      },
+    },
+    SignupRequest: {
+      type: "object",
+      required: ["firstName", "lastName", "emailAddress", "password"],
+      properties: {
+        firstName: { type: "string" },
+        lastName: { type: "string" },
+        emailAddress: { type: "string", format: "email" },
+        password: { type: "string", minLength: 8 },
+      },
+    },
+    VerifyEmailRequest: {
+      type: "object",
+      required: ["verificationToken"],
+      properties: {
+        verificationToken: { type: "string" },
+      },
+    },
+    ForgotPasswordRequest: {
+      type: "object",
+      required: ["emailAddress"],
+      properties: {
+        emailAddress: { type: "string", format: "email" },
+      },
+    },
+    ResetPasswordRequest: {
+      type: "object",
+      required: ["resetToken", "newPassword"],
+      properties: {
+        resetToken: { type: "string" },
+        newPassword: { type: "string", minLength: 8 },
+      },
+    },
+    TokenResponse: {
+      type: "object",
+      properties: {
+        status: { type: "string", enum: ["success", "fail", "error"] },
+        token: { type: "string" },
+      },
+    },
+    ErrorResponse: {
+      type: "object",
+      properties: {
+        status: { type: "string", enum: ["fail", "error"] },
+        message: { type: "string" },
+        errors: { type: "object" },
+      },
+    },
+  },
+};
+
 export const paths = {
-  "/auth/login": {
+  "/api/v1/auth/login": {
     post: {
       tags: ["Authentication"],
       summary: "User login",
@@ -32,7 +102,7 @@ export const paths = {
       },
     },
   },
-  "/auth/register": {
+  "/api/v1/auth/register": {
     post: {
       tags: ["Authentication"],
       summary: "User registration",
@@ -65,7 +135,7 @@ export const paths = {
       },
     },
   },
-  "/auth/verify-email": {
+  "/api/v1/auth/verify-email": {
     post: {
       tags: ["Authentication"],
       summary: "Verify email address",
@@ -93,7 +163,7 @@ export const paths = {
       },
     },
   },
-  "/auth/resend-verify-email": {
+  "/api/v1/auth/resend-verify-email": {
     post: {
       tags: ["Authentication"],
       summary: "Resend verification email",
@@ -114,7 +184,7 @@ export const paths = {
       },
     },
   },
-  "/auth/forgot-password": {
+  "/api/v1/auth/forgot-password": {
     post: {
       tags: ["Authentication"],
       summary: "Request password reset",
@@ -142,7 +212,7 @@ export const paths = {
       },
     },
   },
-  "/auth/reset-password": {
+  "/api/v1/auth/reset-password": {
     post: {
       tags: ["Authentication"],
       summary: "Reset password",
@@ -170,7 +240,7 @@ export const paths = {
       },
     },
   },
-  "/auth/logout": {
+  "/api/v1/auth/logout": {
     post: {
       tags: ["Authentication"],
       summary: "User logout",
@@ -191,7 +261,7 @@ export const paths = {
       },
     },
   },
-  "/auth/refresh": {
+  "/api/v1/auth/refresh": {
     post: {
       tags: ["Authentication"],
       summary: "Refresh access token",
@@ -217,7 +287,7 @@ export const paths = {
       },
     },
   },
-  "/properties": {
+  "/api/v1/properties": {
     get: {
       tags: ["Properties"],
       summary: "Get all properties",

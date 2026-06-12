@@ -1,5 +1,5 @@
 import swaggerJSDoc from "swagger-jsdoc";
-import { paths } from "../src/docs/openapi.js";
+import { paths, components as openApiComponents } from "../src/docs/openapi.js";
 
 const options = {
   definition: {
@@ -16,6 +16,7 @@ const options = {
     ],
     paths,
     components: {
+      ...openApiComponents,
       securitySchemes: {
         cookieAuth: {
           type: "apikey",
