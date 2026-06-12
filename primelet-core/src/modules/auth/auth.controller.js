@@ -140,7 +140,34 @@ const logout = async (req, res, next) => {
   }
 };
 
-const refresh = async (req, res, next) => {};
+const refresh = async (req, res, next) => {
+  try {
+    const { accessToken, newRefreshToken } = await authService.refresh(
+      req.refreshToken,
+    );
+
+    // set cookies
+    res.cookie("_accesstoken", accessToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 1000,
+    });
+
+    res.cookie("_refreshtoken", newRefreshToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      status: "success",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export default {
   login,

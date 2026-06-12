@@ -321,7 +321,60 @@ const resetPassword = async (resetToken, password) => {
 
 const logout = async (userId) => {};
 
-const refresh = async () => {};
+const refresh = async (refreshToken) => {
+  try {
+    // hash refresh token
+    const incomingHash = crypto.hash("sha256", refreshToken, "hex");
+
+    // lookup incoming hash in DB
+    const [rows] = await pool.execute(
+      `SELECT user_id, expires_at FROM refresh_tokens WHERE token_hash = ?`,
+      [incomingHash],
+    );
+
+    if (rows.length === 0) {
+      throw utils.appError("Unauthorized", 401);
+    }
+
+    const { user_id, expires_at } = rows[0];
+
+    if (new Date(expires_at).getTime() < Date.now()) {
+      throw utils.appError("Unauthorized", 401);
+    }
+
+    const accessToken = utils.signAccessToken(user_id);
+    const newRefreshToken = utils.signRefreshToken(user_id);
+
+    const tokenHash = crypto.hash("sha256", newRefreshToken, "hex");
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    // update DB records
+    await pool.execute(
+      `UPDATE refresh_tokens SET token_hash = ?, expires_at = ? WHERE user_id = ?`,
+      [tokenHash, expiresAt, user_id],
+    );
+
+    return { accessToken, newRefreshToken };
+  } catch (error) {
+    throw error;
+  }
+  /*
+  const accessToken = utils.signAccessToken(userId);
+  const refreshToken = utils.signRefreshToken(userId);
+
+  // hash refreshToken
+  const refreshTokenHash = crypto.hash("sha256", refreshToken, "hex");
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+  // update in db
+  await pool.execute(
+    `UPDATE refresh_tokens SET token_hash = ?, expires_at = ? WHERE user_id = ?`,
+    [refreshTokenHash, expiresAt, userId],
+  );
+
+  return { accessToken, refreshToken };
+  */
+};
 
 export default {
   login,

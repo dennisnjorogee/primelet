@@ -20,4 +20,22 @@ const auth = () => {
   };
 };
 
-export default { auth };
+const refresh = () => {
+  return (req, res, next) => {
+    try {
+      const refreshToken = req.cookies._refreshtoken;
+
+      if (!refreshToken) {
+        throw utils.appError("Unauthorized", 400);
+      }
+
+      req.refreshToken = refreshToken;
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+export default { auth, refresh };
