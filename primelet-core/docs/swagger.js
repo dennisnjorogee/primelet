@@ -1,4 +1,5 @@
 import swaggerJSDoc from "swagger-jsdoc";
+import { paths } from "../src/docs/openapi.js";
 
 const options = {
   definition: {
@@ -13,6 +14,7 @@ const options = {
         url: "http://127.0.0.1:5000",
       },
     ],
+    paths,
     components: {
       securitySchemes: {
         cookieAuth: {
@@ -28,7 +30,7 @@ const options = {
       },
     ],
   },
-  apis: ["./src/**/*.js"],
+  apis: [],
 };
 
 export default swaggerJSDoc(options);
