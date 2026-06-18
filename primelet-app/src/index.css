@@ -3,6 +3,16 @@
 @import "tailwindcss";
 
 
+:root {
+  --primary-color: #2563eb; 
+  --primary-color-hover: #1d4ed8; 
+}
+
+
+@theme {
+  --color-primary: var(--primary-color);
+}
+
 *, .nav-text{
     font-family: cursive;
 }
@@ -15,7 +25,7 @@
   height: 80px;
   padding: 15px 20px 15px 20px ;
   border-radius: 100px;
-  background-color: rgba(120, 166, 166, 0.769);
+  background-color: var(--primary-color);
   backdrop-filter: blur(10px);
 
 }

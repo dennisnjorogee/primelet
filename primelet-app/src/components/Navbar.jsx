@@ -9,11 +9,11 @@ const Navbar = () => {
   const isLoginPage = location.pathname === '/login'
 
   return (
-    <header className="fixed top-0 left-0 w-full h-20 bg-white shadow-2xl z-50">
+    <header className="fixed top-0 left-0 w-full h-20 bg-primary text-white shadow-2xl z-50">
       <div className="flex justify-between items-center h-full px-6 md:px-10">
 
         {/* Logo */}
-         <h1 className="text-lg font-bold text-blue-500 cursor-pointer" onClick={() => navigate('/')}>Primelet</h1>
+         <h1 className="text-lg font-bold cursor-pointer" onClick={() => navigate('/')}>Primelet</h1>
 
         {/* Desktop Nav — hidden on login page */}
         {!isLoginPage && (
@@ -43,9 +43,9 @@ const Navbar = () => {
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
-            <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
-            <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-300 ${isOpen ? 'opacity-0' : ''}`} />
-            <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+            <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
+            <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
           </button>
         )}
 
@@ -53,7 +53,7 @@ const Navbar = () => {
 
       {/* Mobile Menu — hidden on login page */}
       {!isLoginPage && (
-        <div className={`md:hidden bg-white shadow-lg overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-80 py-4' : 'max-h-0'}`}>
+        <div className={`md:hidden bg-primary shadow-lg overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-80 py-4' : 'max-h-0'}`}>
           <nav className="flex flex-col items-start gap-1 px-6">
             <Link to='/' className="navbar w-full py-2 border-b border-gray-100" onClick={() => setIsOpen(false)}>Home</Link>
             <Link to='/about' className="navbar w-full py-2 border-b border-gray-100" onClick={() => setIsOpen(false)}>About Us</Link>

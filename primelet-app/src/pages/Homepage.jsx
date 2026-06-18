@@ -1,5 +1,6 @@
 
 import houseProfile from '../assets/house-profile.jpg'
+import Suggested from './Suggested'
 
 const propertyTypes = [
   { icon: '🏠', label: 'Houses',     count: 22 },
@@ -29,7 +30,7 @@ const Homepage = () => {
 
         
 
-        <h1 className="text-5xl md:text-4xl font-bold text-center text-amber-500">
+        <h1 className="text-5xl md:text-4xl font-bold text-center text-primary">
          <span className='text-white text-shadow-xl'>Let Us Help you find a </span> <br /> Dream House for You and Your Family
         </h1>
 
@@ -39,11 +40,11 @@ const Homepage = () => {
 <div className='flex py-3 px-5 bg-white rounded-2xl mt-4 h-16 w-full items-center justify-between gap-2 shadow-lg'>
   
   {/* Keywords Input */}
-  {/* <input
+  <input
     type="text"
     placeholder="Enter keywords"
     className='text-sm text-gray-600 placeholder-gray-400 border-0 outline-none flex-1 min-w-0'
-  /> */}
+  />
 
   <div className='w-px h-8 bg-gray-200' />
 
@@ -137,6 +138,8 @@ const Homepage = () => {
       </div>
 
     </section>
+
+    <Suggested />
 </main>
   )
 }
