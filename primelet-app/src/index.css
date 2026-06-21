@@ -6,11 +6,16 @@
 :root {
   --primary-color: #2563eb; 
   --primary-color-hover: #1d4ed8; 
+  --text-color:#ff7f50;
+  --bg-color: #0f0f07;
 }
 
 
 @theme {
   --color-primary: var(--primary-color);
+  --color-hover: var(--primary-color-hover);
+  --color-text: var(--text-color);
+  --color-bg: var(--bg-color);
 }
 
 *, .nav-text{
@@ -49,5 +54,5 @@
 } */
 
 .navbar:hover{
-  color:coral;
+  color:#ff7f50;
 }

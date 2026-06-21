@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar"
 import Homepage from "./pages/Homepage"
 import Login from "./pages/Login.jsx"
 import Footer from "./components/Footer"
+import House from "./pages/House.jsx"
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/house" element={<House />} />
         </Routes>
       </main>
 
