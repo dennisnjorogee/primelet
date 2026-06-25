@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -23,7 +23,7 @@ const AppContextProvider = ({ children }) => {
                 err?.response?.data?.error   ||
                 err.message                  ||
                 "Something went wrong";
-            toast.error(msg);   
+            toast.error(msg);
             return null;
         } finally {
             setLoading(false);
@@ -31,7 +31,6 @@ const AppContextProvider = ({ children }) => {
     }, []);
 
     //Auth 
-
     const register_user = useCallback(
         ({ firstName, lastName, emailAddress, password }) =>
             request(async () => {
@@ -89,13 +88,52 @@ const AppContextProvider = ({ children }) => {
         [backend_url, request]
     );
 
+    const verify_email = useCallback(
+    ({ verificationToken }) =>
+        request(async () => {
+            const { data } = await axios.post(
+                `${backend_url}/api/v1/auth/verify-email`,
+                { verificationToken },
+                { withCredentials: true }
+            );
+            toast.success(data.message || "Email verified successfully!");
+            return data;
+        }),
+    [backend_url, request]
+);
+
+const get_me = useCallback(async () => {
+    try {
+        const { data } = await axios.get(
+            `${backend_url}/api/v1/auth/get-me`,
+            { withCredentials: true }
+        );
+        if (data?.status === "success") {
+            setAuthUser(data.user);
+        }
+        return data?.user ?? null;
+    } catch {
+        setAuthUser(null);
+        return null;   // silent — no toast
+    }
+}, [backend_url]);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            await get_me();
+        };
+        fetchUser();
+    }, [get_me]);
+
     const value = {
         authUser,
         loading,
         register_user,
+        verify_email,
         login_user,
         logout_user,
         forgot_password,
+        get_me
     };
 
     return (

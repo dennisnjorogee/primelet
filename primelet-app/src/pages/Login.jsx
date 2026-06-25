@@ -1,44 +1,43 @@
-import { useState } from "react"
-import { useAppContext } from "../context/AppContext"
-import { useNavigate } from "react-router-dom"
+import { useState } from "react";
+import { useAppContext } from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const { register_user, login_user, forgot_password, loading, error: ctxError } = useAppContext()
+  const { register_user, login_user, forgot_password, loading } = useAppContext();
 
-  const [view, setView] = useState('login')
+  const [view, setView] = useState('login');
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', emailAddress: '', password: '', confirmPassword: ''
-  })
-  const [localError, setLocalError] = useState('')
+  });
+  const [localError, setLocalError] = useState('');
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-    setLocalError('')
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setLocalError('');
+  };
 
   const handleSubmit = async () => {
-    //Client-side validation
     if (view === 'register') {
-      if (!formData.firstName.trim())  { setLocalError('First name is required'); return }
-      if (!formData.lastName.trim())   { setLocalError('Last name is required');  return }
-      if (formData.password.length < 6){ setLocalError('Password must be at least 6 characters'); return }
-      if (formData.password !== formData.confirmPassword) { setLocalError('Passwords do not match'); return }
+      if (!formData.firstName.trim())  { setLocalError('First name is required'); return; }
+      if (!formData.lastName.trim())   { setLocalError('Last name is required');  return; }
+      if (formData.password.length < 6){ setLocalError('Password must be at least 6 characters'); return; }
+      if (formData.password !== formData.confirmPassword) { setLocalError('Passwords do not match'); return; }
     }
-    if (!formData.emailAddress.trim()) { setLocalError('Email is required'); return }
+    if (!formData.emailAddress.trim()) { setLocalError('Email is required'); return; }
 
-    //API calls via context 
+    // API calls via context 
     if (view === 'register') {
       const result = await register_user({
         firstName:    formData.firstName,
         lastName:     formData.lastName,
         emailAddress: formData.emailAddress,
         password:     formData.password,
-      })
+      });
       if (result) {
-        setView('login')
-        setFormData({ firstName: '', lastName: '', emailAddress: '', password: '', confirmPassword: '' })
+        setView('login');
+        setFormData({ firstName: '', lastName: '', emailAddress: '', password: '', confirmPassword: '' });
       }
     }
 
@@ -46,31 +45,29 @@ const Login = () => {
       const result = await login_user({
         emailAddress: formData.emailAddress,
         password:     formData.password,
-      })
+      });
       if (result) {
-        navigate('/');
-        //console.log('Logged in:', result)
+        navigate('/'); 
       }
     }
 
     if (view === 'reset') {
-      const result = await forgot_password({ emailAddress: formData.emailAddress })
+      const result = await forgot_password({ emailAddress: formData.emailAddress });
       if (result) {
-        setLocalError('')
+        setLocalError('');
       }
     }
-  }
+  };
 
   const config = {
     login:    { title: 'Sign In',        subtitle: 'Sign in to your account',   btn: 'Sign In' },
     register: { title: 'Create Account', subtitle: 'Sign up for a new account', btn: 'Create Account' },
     reset:    { title: 'Reset Password', subtitle: 'Enter your email to reset', btn: 'Send Reset Link' },
-  }
+  };
 
-  const { title, subtitle, btn } = config[view]
-  const displayError = localError || ctxError
+  const { title, subtitle, btn } = config[view];
 
-  const inputClass = "w-full py-3 px-4 border-0 rounded-full bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+  const inputClass = "w-full py-3 px-4 border-0 rounded-full bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300";
 
   return (
     <div className="flex flex-col p-6 items-center justify-center min-h-screen">
@@ -92,7 +89,6 @@ const Login = () => {
             </>
           )}
 
-          {/* emailAddress — matches backend field name */}
           <input name="emailAddress"   value={formData.emailAddress} onChange={handleChange} className={inputClass} type="email"    placeholder="Email" />
 
           {view !== "reset" && (
@@ -103,8 +99,8 @@ const Login = () => {
             <input name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={inputClass} type="password" placeholder="Confirm Password" />
           )}
 
-          {displayError && (
-            <p className="text-red-500 text-sm text-center">{displayError}</p>
+          {localError && (
+            <p className="text-red-500 text-sm italic font-semibold bg-red-300/20 py-4 px-5 text-center">{localError}</p>
           )}
         </div>
 
@@ -137,7 +133,7 @@ const Login = () => {
 
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

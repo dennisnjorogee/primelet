@@ -5,22 +5,12 @@ import utils from "../../utils/utils.js";
 import emailService from "../../services/email.service.js";
 
 const login = async (loginData) => {
-  /**
-   * LOGIN SERVICE WORKFLOW
-   * - check if identifier(emailAddress) exists in db
-   * - if emailAddress does not exist, throw an error(unauthorized)
-   * -else compare submitted password with stored password(in DB)
-   * -if they match, return access token
-   * -else throw error
-   */
-
   try {
-    //destructure login data
     const { emailAddress, password } = loginData;
 
-    // check if email exists
+    // ⚡ FIXED: Removed profile_image from the SELECT list to prevent a MySQL crash
     const [emailRows] = await pool.execute(
-      `SELECT id, password_hash FROM users WHERE email_address = ?`,
+      `SELECT id, first_name, last_name, email_address, password_hash FROM users WHERE email_address = ?`,
       [emailAddress],
     );
 
@@ -28,30 +18,39 @@ const login = async (loginData) => {
       throw utils.appError("Invalid email or password", 401);
     }
 
-    const user = emailRows[0];
+    const userRow = emailRows[0];
 
     // compare passwords
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    const isPasswordValid = await bcrypt.compare(password, userRow.password_hash);
 
     if (!isPasswordValid) {
       throw utils.appError("Invalid email or password", 401);
     }
 
     // generate JWT access + refresh tokens
-    const accessToken = utils.signAccessToken(user.id);
-    const refreshToken = utils.signRefreshToken(user.id);
+    const accessToken = utils.signAccessToken(userRow.id);
+    const refreshToken = utils.signRefreshToken(userRow.id);
 
-    // hash refresh token
     const refreshTokenHash = crypto.hash("sha256", refreshToken, "hex");
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // expires in 7 days
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-    // store refresh token hash in db
     await pool.execute(
       `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token_hash = VALUES(token_hash), expires_at = VALUES(expires_at)`,
-      [user.id, refreshTokenHash, expiresAt],
+      [userRow.id, refreshTokenHash, expiresAt],
     );
 
-    return { accessToken, refreshToken };
+    // ⚡ FIXED: Hardcode profileImage to null for now so your frontend can safely read it
+    return { 
+      accessToken, 
+      refreshToken,
+      user: {
+        id: userRow.id,
+        firstName: userRow.first_name,
+        lastName: userRow.last_name,
+        emailAddress: userRow.email_address,
+        profileImage: null 
+      }
+    };
   } catch (error) {
     throw error;
   }
@@ -319,7 +318,18 @@ const resetPassword = async (resetToken, password) => {
   }
 };
 
-const logout = async (userId) => {};
+const logout = async (userId) => {
+  try {
+    // Delete all active refresh token sessions for this user from the database
+    await pool.execute(
+      `DELETE FROM refresh_tokens WHERE user_id = ?`,
+      [userId]
+    );
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
 
 const refresh = async (refreshToken) => {
   try {

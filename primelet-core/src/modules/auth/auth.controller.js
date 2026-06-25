@@ -1,17 +1,19 @@
 import authService from "./auth.service.js";
+import pool from "../../config/db.js";
+import utils from "../../utils/utils.js";
 
 const login = async (req, res, next) => {
   try {
-    //logindata contains emailAddress, password
     const loginData = req.body;
 
-    const { accessToken, refreshToken } = await authService.login(loginData);
+    const { accessToken, refreshToken, user } = await authService.login(loginData);
 
     res.cookie("_accesstoken", accessToken, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 1000,
+      path: "/", 
     });
 
     res.cookie("_refreshtoken", refreshToken, {
@@ -19,11 +21,13 @@ const login = async (req, res, next) => {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/", 
     });
 
     return res.status(200).json({
       status: "success",
       message: "Login successful.",
+      user
     });
   } catch (error) {
     next(error);
@@ -32,7 +36,6 @@ const login = async (req, res, next) => {
 
 const register = async (req, res, next) => {
   try {
-    // registrationData contains firstName, lastName, emailAddress, & password
     const registrationData = req.body;
 
     const registrationToken = await authService.register(registrationData);
@@ -57,7 +60,6 @@ const register = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   try {
-    // destructure verification token
     const { verificationToken } = req.body;
 
     await authService.verifyEmail(verificationToken);
@@ -127,9 +129,25 @@ const resetPassword = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    const { userId } = req.user;
+    const userId = req.user?.id; 
 
-    await authService.logout(userId);
+    if (userId) {
+      await authService.logout(userId);
+    }
+
+    res.clearCookie("_accesstoken", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    });
+
+    res.clearCookie("_refreshtoken", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    });
 
     return res.status(200).json({
       status: "success",
@@ -169,6 +187,36 @@ const refresh = async (req, res, next) => {
   }
 };
 
+const getMe = async (req, res, next) => {
+  try {
+    const userId = req.user?.userId;
+
+    const [rows] = await pool.execute(
+      `SELECT id, first_name, last_name, email_address, profile_image, email_verified
+       FROM users WHERE id = ?`,
+      [userId]
+    );
+
+    if (rows.length === 0) throw utils.appError("User not found", 404);
+
+    const u = rows[0];
+
+    return res.status(200).json({
+      status: "success",
+      user: {
+        id:            u.id,
+        firstName:     u.first_name,
+        lastName:      u.last_name,
+        emailAddress:  u.email_address,
+        profileImage:  u.profile_image ?? null,
+        emailVerified: u.email_verified === 1,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   login,
   register,
@@ -178,4 +226,5 @@ export default {
   resetPassword,
   logout,
   refresh,
+  getMe
 };

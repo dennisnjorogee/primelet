@@ -40,8 +40,10 @@ router.post(
   authController.resetPassword,
 );
 
-router.post("/logout", authMiddleware.auth(), authController.logout);
+router.post("/logout", authController.logout);
 
 router.post("/refresh", authMiddleware.refresh(), authController.refresh);
+
+router.get('/get-me', authMiddleware.auth(), authController.getMe);
 
 export default router;
