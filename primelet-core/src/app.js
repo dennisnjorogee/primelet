@@ -19,6 +19,10 @@ app.use("/api/v1/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/v1", routes);
 
+app.use((req, res, next) => {
+  res.sendStatus(404);
+});
+
 app.use((error, req, res, next) => {
   if (error.isAppError) {
     return res.status(error.statusCode).json({
