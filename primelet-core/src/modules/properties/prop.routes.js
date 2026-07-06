@@ -1,7 +1,10 @@
 import { Router } from "express";
-import { propTest } from "./prop.controller.js";
+import propController from "./prop.controller.js";
 const router = Router();
 
-router.get("/", propTest);
+// get all properties
+router.get("/", propController.getAllProperties);
+// get property by slug
+router.get("/:param", propController.getPropertyBySlug);
 
 export default router;
