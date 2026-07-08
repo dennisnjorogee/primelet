@@ -5,6 +5,6 @@ const router = Router();
 // get all properties
 router.get("/", propController.getAllProperties);
 // get property by slug
-router.get("/:param", propController.getPropertyBySlug);
+router.get("/:slug", propController.getPropertyBySlug);
 
 export default router;
