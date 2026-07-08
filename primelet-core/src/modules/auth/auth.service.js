@@ -8,7 +8,6 @@ const login = async (loginData) => {
   try {
     const { emailAddress, password } = loginData;
 
-    // ⚡ FIXED: Removed profile_image from the SELECT list to prevent a MySQL crash
     const [emailRows] = await pool.execute(
       `SELECT id, first_name, last_name, email_address, password_hash FROM users WHERE email_address = ?`,
       [emailAddress],
@@ -21,7 +20,10 @@ const login = async (loginData) => {
     const userRow = emailRows[0];
 
     // compare passwords
-    const isPasswordValid = await bcrypt.compare(password, userRow.password_hash);
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      userRow.password_hash,
+    );
 
     if (!isPasswordValid) {
       throw utils.appError("Invalid email or password", 401);
@@ -39,17 +41,16 @@ const login = async (loginData) => {
       [userRow.id, refreshTokenHash, expiresAt],
     );
 
-    // ⚡ FIXED: Hardcode profileImage to null for now so your frontend can safely read it
-    return { 
-      accessToken, 
+    return {
+      accessToken,
       refreshToken,
       user: {
         id: userRow.id,
         firstName: userRow.first_name,
         lastName: userRow.last_name,
         emailAddress: userRow.email_address,
-        profileImage: null 
-      }
+        profileImage: null,
+      },
     };
   } catch (error) {
     throw error;
@@ -321,10 +322,9 @@ const resetPassword = async (resetToken, password) => {
 const logout = async (userId) => {
   try {
     // Delete all active refresh token sessions for this user from the database
-    await pool.execute(
-      `DELETE FROM refresh_tokens WHERE user_id = ?`,
-      [userId]
-    );
+    await pool.execute(`DELETE FROM refresh_tokens WHERE user_id = ?`, [
+      userId,
+    ]);
     return true;
   } catch (error) {
     throw error;
