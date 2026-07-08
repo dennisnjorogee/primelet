@@ -3,7 +3,6 @@ import AppError from "../../utils/AppError.js";
 import utils from "../../utils/utils.js";
 
 const fetchAll = async (filters) => {
-  console.log(filters);
   let sql = "SELECT * FROM houses WHERE 1=1";
   const params = [];
 
