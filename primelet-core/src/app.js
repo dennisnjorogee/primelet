@@ -5,6 +5,7 @@ import corsRouter from "./config/cors.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "../docs/swagger.js";
 import routes from "./routes/index.routes.js";
+import AppError from "./utils/AppError.js";
 
 const app = express();
 
@@ -24,6 +25,12 @@ app.use((req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
+  if (error instanceof AppError) {
+    return res.status(error.statusCode).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
   if (error.isAppError) {
     return res.status(error.statusCode).json({
       status: "fail",
