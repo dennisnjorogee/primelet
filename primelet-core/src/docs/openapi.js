@@ -57,6 +57,46 @@ export const components = {
         token: { type: "string" },
       },
     },
+    Property: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+        slug: { type: "string" },
+        title: { type: "string" },
+        description: { type: "string" },
+        price: { type: "number" },
+        beds: { type: "integer" },
+        bath: { type: "integer" },
+        parking: { type: "integer" },
+        county: { type: "string" },
+        imageUrl: { type: "string" },
+      },
+    },
+    PropertyListResponse: {
+      type: "object",
+      properties: {
+        data: {
+          type: "object",
+          properties: {
+            properties: {
+              type: "array",
+              items: { $ref: "#/components/schemas/Property" },
+            },
+          },
+        },
+      },
+    },
+    PropertyResponse: {
+      type: "object",
+      properties: {
+        data: {
+          type: "object",
+          properties: {
+            property: { $ref: "#/components/schemas/Property" },
+          },
+        },
+      },
+    },
     ErrorResponse: {
       type: "object",
       properties: {
@@ -291,18 +331,93 @@ export const paths = {
     get: {
       tags: ["Properties"],
       summary: "Get all properties",
-      description: "Retrieve list of all properties",
+      description: "Retrieve a list of properties with optional filters",
+      parameters: [
+        {
+          name: "minPrice",
+          in: "query",
+          schema: { type: "number" },
+          description: "Minimum property price",
+        },
+        {
+          name: "maxPrice",
+          in: "query",
+          schema: { type: "number" },
+          description: "Maximum property price",
+        },
+        {
+          name: "beds",
+          in: "query",
+          schema: { type: "integer" },
+          description: "Number of bedrooms",
+        },
+        {
+          name: "bath",
+          in: "query",
+          schema: { type: "integer" },
+          description: "Number of bathrooms",
+        },
+        {
+          name: "parking",
+          in: "query",
+          schema: { type: "integer" },
+          description: "Number of parking spaces",
+        },
+        {
+          name: "county",
+          in: "query",
+          schema: { type: "string" },
+          description: "County filter",
+        },
+      ],
       responses: {
         200: {
           description: "Properties retrieved successfully",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  status: { type: "string", enum: ["success"] },
-                },
-              },
+              schema: { $ref: "#/components/schemas/PropertyListResponse" },
+            },
+          },
+        },
+        404: {
+          description: "No properties found",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+            },
+          },
+        },
+      },
+    },
+  },
+  "/api/v1/properties/{slug}": {
+    get: {
+      tags: ["Properties"],
+      summary: "Get property by slug",
+      description: "Retrieve a single property using its unique slug",
+      parameters: [
+        {
+          name: "slug",
+          in: "path",
+          required: true,
+          schema: { type: "string" },
+          description: "Unique property slug",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Property retrieved successfully",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PropertyResponse" },
+            },
+          },
+        },
+        404: {
+          description: "Property not found",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
             },
           },
         },
