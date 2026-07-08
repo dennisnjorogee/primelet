@@ -15,11 +15,8 @@ const getAllProperties = async (req, res, next) => {
 // get property by slug
 const getPropertyBySlug = async (req, res, next) => {
   try {
-    // destructure param(slug)
-    const { param } = req.params;
-
-    // transform slug
-    const slug = param.trim();
+    // destructure slug
+    const { slug } = req.params;
 
     const property = await propService.getPropertyBySlug(slug);
 
