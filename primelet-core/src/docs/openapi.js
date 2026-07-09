@@ -390,6 +390,31 @@ export const paths = {
       },
     },
   },
+  "/api/v1/properties/suggestions": {
+    get: {
+      tags: ["Properties"],
+      summary: "Get suggested properties",
+      description: "Retrieve a list of random property suggestions",
+      responses: {
+        200: {
+          description: "Suggested properties retrieved successfully",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PropertyListResponse" },
+            },
+          },
+        },
+        404: {
+          description: "No suggested properties found",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+            },
+          },
+        },
+      },
+    },
+  },
   "/api/v1/properties/{slug}": {
     get: {
       tags: ["Properties"],
