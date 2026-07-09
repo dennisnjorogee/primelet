@@ -1,3 +1,4 @@
 node_modules/
 .env
 src/templates/test.html
+dump.sql
