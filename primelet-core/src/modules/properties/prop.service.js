@@ -12,4 +12,6 @@ const getAllProperties = ({
 
 const getPropertyBySlug = (slug) => propRepository.fetchBySlug(slug);
 
-export default { getAllProperties, getPropertyBySlug };
+const getSuggestions = () => propRepository.fetchRandom();
+
+export default { getAllProperties, getPropertyBySlug, getSuggestions };

@@ -59,7 +59,7 @@ const fetchBySlug = async (slug) => {
 
 const fetchRandom = async () => {
   const [rows] = await pool.execute(
-    "SELECT * FROM houses ORDER BY RAND() LIMIT 10",
+    "SELECT * FROM houses ORDER BY RAND() LIMIT 5",
   );
 
   return rows;

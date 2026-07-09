@@ -38,4 +38,16 @@ const getPropertyBySlug = async (req, res, next) => {
   }
 };
 
-export default { getAllProperties, getPropertyBySlug };
+const getSuggestions = async (req, res, next) => {
+  try {
+    const properties = await propService.getSuggestions();
+
+    res.status(200).json({
+      data: { properties },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { getAllProperties, getPropertyBySlug, getSuggestions };
