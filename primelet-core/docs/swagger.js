@@ -1,6 +1,8 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import { paths, components as openApiComponents } from "../src/docs/openapi.js";
 
+const swaggerServerUrl = process.env.SWAGGER_SERVER_URL || "/";
+
 const options = {
   definition: {
     openapi: "3.0.0",
@@ -11,7 +13,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://127.0.0.1:5000",
+        url: swaggerServerUrl,
       },
     ],
     paths,
