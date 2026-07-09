@@ -57,4 +57,12 @@ const fetchBySlug = async (slug) => {
   return rows[0];
 };
 
-export default { fetchAll, fetchBySlug };
+const fetchRandom = async () => {
+  const [rows] = await pool.execute(
+    "SELECT * FROM houses ORDER BY RAND() LIMIT 10",
+  );
+
+  return rows;
+};
+
+export default { fetchAll, fetchBySlug, fetchRandom };
