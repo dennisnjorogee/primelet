@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Homepage from "./pages/Homepage";
 import Login from "./pages/Login.jsx";
 import Footer from "./components/Footer";
+import { PropertyPage } from "./pages/PropertyPage.jsx";
 import House from "./pages/House.jsx";
 import { ToastContainer } from "react-toastify";
 import Verify from "./pages/Verify.jsx";
@@ -21,6 +22,7 @@ const App = () => {
           <Route path="/verify" element={<Verify />} />
           <Route path="/forgot" element={<ForgotPassword />} />
           <Route path="/house" element={<House />} />
+          <Route path="/properties/:slug" element={<PropertyPage />} />
         </Routes>
       </main>
 

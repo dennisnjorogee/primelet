@@ -1,39 +1,7 @@
-import house1 from "../assets/house-profile.jpg";
-import house2 from "../assets/house1.avif";
-import house3 from "../assets/house.png";
-
-const properties = [
-  {
-    id: 1,
-    image: house1,
-    title: "Ocean Breeze Villa",
-    address: "32 Ocean Drive",
-    beds: 3,
-    baths: 2,
-    parking: 2,
-    price: "ksh 275,000",
-  },
-  {
-    id: 2,
-    image: house2,
-    title: "Jakson House",
-    address: "221 Baker Street",
-    beds: 3,
-    baths: 2,
-    parking: null,
-    price: "ksh 230,000",
-  },
-  {
-    id: 3,
-    image: house3,
-    title: "Lakeside Cottage",
-    address: "145 Pinecrest Lane",
-    beds: 3,
-    baths: 2,
-    parking: null,
-    price: "ksh 340,000",
-  },
-];
+import { useEffect, useState } from "react";
+import { apiClient } from "../config/api";
+import { Link } from "react-router-dom";
+const IMAGE_URL = import.meta.env.VITE_STATIC_FILES_URL;
 
 const BedIcon = () => (
   <svg
@@ -84,6 +52,28 @@ const ParkingIcon = () => (
 );
 
 const Suggested = () => {
+  const [properties, setProperties] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const response = await apiClient.get("/api/v1/properties/suggestions");
+        setProperties(response.data.data.properties);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSuggestions();
+  }, []);
+
+  if (loading) {
+    return <h2>Loading...</h2>;
+  }
+
   return (
     <section className="px-6 py-12 bg-white max-w-6xl mx-auto">
       {/* Heading */}
@@ -94,50 +84,55 @@ const Suggested = () => {
       {/* Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {properties.map((property) => (
-          <div
-            key={property.id}
-            className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer border border-gray-100"
-          >
-            {/* Image */}
-            <div className="relative h-52 overflow-hidden">
-              <img
-                src={property.image}
-                alt={property.title}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-
-            {/* Details */}
-            <div className="p-4 flex flex-col gap-2">
-              <h3 className="text-base font-bold text-gray-900">
-                {property.title}
-              </h3>
-              <p className="text-sm text-gray-400">{property.address}</p>
-
-              {/* Features */}
-              <div className="flex items-center gap-4 text-gray-500 text-sm mt-1">
-                <span className="flex items-center gap-1">
-                  <BedIcon /> {property.beds}
-                </span>
-                <span className="flex items-center gap-1">
-                  <BathIcon /> {property.baths}
-                </span>
-                {property.parking && (
-                  <span className="flex items-center gap-1">
-                    <ParkingIcon /> {property.parking}
-                  </span>
-                )}
+          <Link to={`/properties/${property.slug}`}>
+            <div
+              key={property.id}
+              className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer border border-gray-100"
+            >
+              {/* Image */}
+              <div className="relative h-52 overflow-hidden">
+                <img
+                  src={`${IMAGE_URL}${property.image}`}
+                  alt={property.title}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                />
               </div>
 
-              {/* Price */}
-              <p className="text-blue-600 font-bold text-base mt-1">
-                {property.price}
-                <span className="text-gray-400 font-normal text-sm">
-                  /month
-                </span>
-              </p>
+              {/* Details */}
+              <div className="p-4 flex flex-col gap-2">
+                <h3 className="text-base font-bold text-gray-900">
+                  {property.title}
+                </h3>
+                <p className="text-sm text-gray-400">{property.address}</p>
+
+                {/* Features */}
+                <div className="flex items-center gap-4 text-gray-500 text-sm mt-1">
+                  <span className="flex items-center gap-1">
+                    <BedIcon /> {property.beds}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <BathIcon /> {property.baths}
+                  </span>
+                  {property.parking && (
+                    <span className="flex items-center gap-1">
+                      <ParkingIcon /> {property.parking}
+                    </span>
+                  )}
+                </div>
+
+                {/* Price */}
+                <p className="text-blue-600 font-bold text-base mt-1">
+                  {Number(property.price).toLocaleString("en-KE", {
+                    style: "currency",
+                    currency: "KES",
+                  })}
+                  <span className="text-gray-400 font-normal text-sm">
+                    /month
+                  </span>
+                </p>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>
